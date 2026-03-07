@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>blazor-shadcn</ToolCommandName>
+    <PackageId>blazor-shadcn</PackageId>
+    <Version>0.2.1</Version>
+    <Authors>Justin Gerber</Authors>
+    <Description>CLI for creating and configuring Blazor projects with shadcn-style components.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>blazor shadcn tailwind components ui cli</PackageTags>
+    <PackageProjectUrl>https://github.com/Justbeingjustin/blazor-shadcn-cli</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Justbeingjustin/blazor-shadcn-cli</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" Link="README.md" />
+  </ItemGroup>
+
+</Project>
