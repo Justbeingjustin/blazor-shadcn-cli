@@ -18,14 +18,110 @@ internal static partial class BlazorShadcnCli
 
     private static readonly UTF8Encoding Utf8NoBom = new(encoderShouldEmitUTF8Identifier: false);
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly string[] ThemeInlineTokenLines =
+    [
+        "--font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;",
+        "--font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;",
+        "--radius-sm: calc(var(--radius) - 4px);",
+        "--radius-md: calc(var(--radius) - 2px);",
+        "--radius-lg: var(--radius);",
+        "--color-background: var(--background);",
+        "--color-foreground: var(--foreground);",
+        "--color-primary: var(--primary);",
+        "--color-primary-foreground: var(--primary-foreground);",
+        "--color-secondary: var(--secondary);",
+        "--color-secondary-foreground: var(--secondary-foreground);",
+        "--color-muted: var(--muted);",
+        "--color-muted-foreground: var(--muted-foreground);",
+        "--color-accent: var(--accent);",
+        "--color-accent-foreground: var(--accent-foreground);",
+        "--color-destructive: var(--destructive);",
+        "--color-border: var(--border);",
+        "--color-input: var(--input);",
+        "--color-ring: var(--ring);",
+    ];
+    private static readonly string[] RootThemeTokenLines =
+    [
+        "--radius: 0.625rem;",
+        "--background: oklch(1 0 0);",
+        "--foreground: oklch(0.145 0 0);",
+        "--primary: oklch(0.205 0 0);",
+        "--primary-foreground: oklch(0.985 0 0);",
+        "--secondary: oklch(0.97 0 0);",
+        "--secondary-foreground: oklch(0.205 0 0);",
+        "--muted: oklch(0.97 0 0);",
+        "--muted-foreground: oklch(0.556 0 0);",
+        "--accent: oklch(0.97 0 0);",
+        "--accent-foreground: oklch(0.205 0 0);",
+        "--destructive: oklch(0.577 0.245 27.325);",
+        "--border: oklch(0.922 0 0);",
+        "--input: oklch(0.922 0 0);",
+        "--ring: oklch(0.708 0 0);",
+    ];
+    private static readonly string[] DarkThemeTokenLines =
+    [
+        "--background: oklch(0.145 0 0);",
+        "--foreground: oklch(0.985 0 0);",
+        "--primary: oklch(0.922 0 0);",
+        "--primary-foreground: oklch(0.205 0 0);",
+        "--secondary: oklch(0.269 0 0);",
+        "--secondary-foreground: oklch(0.985 0 0);",
+        "--muted: oklch(0.269 0 0);",
+        "--muted-foreground: oklch(0.708 0 0);",
+        "--accent: oklch(0.371 0 0);",
+        "--accent-foreground: oklch(0.985 0 0);",
+        "--destructive: oklch(0.704 0.191 22.216);",
+        "--border: oklch(1 0 0 / 10%);",
+        "--input: oklch(1 0 0 / 15%);",
+        "--ring: oklch(0.556 0 0);",
+    ];
+    private static readonly ComponentDefinition AccordionComponent = new(
+        "accordion",
+        [
+            "Accordion.razor",
+            "AccordionContent.razor",
+            "AccordionContext.cs",
+            "AccordionItem.razor",
+            "AccordionTrigger.razor",
+        ],
+        "Collapsible content sections.");
     private static readonly IReadOnlyDictionary<string, ComponentDefinition> Components =
         new Dictionary<string, ComponentDefinition>(StringComparer.OrdinalIgnoreCase)
         {
-            ["badge"] = new("badge", "Badge.razor", "Simple status badge."),
-            ["button"] = new("button", "Button.razor", "Configurable action button."),
-            ["card"] = new("card", "Card.razor", "Structured content container."),
-            ["input"] = new("input", "Input.razor", "Text input field."),
-            ["separator"] = new("separator", "Separator.razor", "Visual divider."),
+            ["accordion"] = AccordionComponent,
+            ["accordian"] = AccordionComponent,
+            ["avatar"] = new(
+                "avatar",
+                [
+                    "Avatar.razor",
+                    "AvatarBadge.razor",
+                    "AvatarContext.cs",
+                    "AvatarFallback.razor",
+                    "AvatarGroup.razor",
+                    "AvatarGroupCount.razor",
+                    "AvatarImage.razor",
+                ],
+                "Profile image with fallback, badge, and grouping support."),
+            ["badge"] = new("badge", ["Badge.razor"], "Simple status badge."),
+            ["button"] = new("button", ["Button.razor"], "Configurable action button."),
+            ["card"] = new(
+                "card",
+                [
+                    "Card.razor",
+                    "CardAction.razor",
+                    "CardContent.razor",
+                    "CardDescription.razor",
+                    "CardFooter.razor",
+                    "CardHeader.razor",
+                    "CardTitle.razor",
+                ],
+                "Structured content container."),
+            ["checkbox"] = new("checkbox", ["Checkbox.razor"], "Selectable checkbox control."),
+            ["input"] = new("input", ["Input.razor"], "Text input field."),
+            ["label"] = new("label", ["Label.razor"], "Text label for form controls."),
+            ["separator"] = new("separator", ["Separator.razor"], "Visual divider."),
+            ["spinner"] = new("spinner", ["Spinner.razor"], "Loading indicator."),
+            ["typography"] = new("typography", ["Typography.razor"], "Typography primitives and styles."),
         };
 
     private static readonly string[] BootstrapFilePatterns = ["App.razor", "*Layout*.razor", "_Layout.cshtml", "index.html"];
@@ -38,6 +134,7 @@ internal static partial class BlazorShadcnCli
     private const string TailwindBuildCommand = "npx @tailwindcss/cli -i ./Styles/globals.css -o ./wwwroot/tailwind.css --minify";
     private const string TailwindWatchCommand = "npx @tailwindcss/cli -i ./Styles/globals.css -o ./wwwroot/tailwind.css --watch";
     private const string UiImportsNamespace = "@using ShadcnBlazor.Components.UI";
+    private const string AccordionRenderMode = "InteractiveServer";
     private const string DisableUpdateCheckEnvironmentVariable = "BLAZOR_SHADCN_DISABLE_UPDATE_CHECK";
     private const string UpdateCacheFileName = "update-check.json";
     private static readonly TimeSpan UpdateCacheDuration = TimeSpan.FromHours(12);
@@ -123,11 +220,13 @@ internal static partial class BlazorShadcnCli
         if (json)
         {
             var payload = Components.Values
+                .DistinctBy(component => component.Name, StringComparer.OrdinalIgnoreCase)
                 .OrderBy(component => component.Name, StringComparer.OrdinalIgnoreCase)
                 .Select(component => new JsonObject
                 {
                     ["name"] = component.Name,
-                    ["fileName"] = component.FileName,
+                    ["fileName"] = component.PrimaryFileName,
+                    ["fileNames"] = new JsonArray(component.FileNames.Select(fileName => JsonValue.Create(fileName)).ToArray()),
                     ["description"] = component.Description,
                 })
                 .ToArray();
@@ -137,7 +236,9 @@ internal static partial class BlazorShadcnCli
         }
 
         Console.WriteLine("Available components:");
-        foreach (var component in Components.Values.OrderBy(component => component.Name, StringComparer.OrdinalIgnoreCase))
+        foreach (var component in Components.Values
+                     .DistinctBy(component => component.Name, StringComparer.OrdinalIgnoreCase)
+                     .OrderBy(component => component.Name, StringComparer.OrdinalIgnoreCase))
         {
             Console.WriteLine($"- {component.Name}: {component.Description}");
         }
@@ -176,20 +277,33 @@ internal static partial class BlazorShadcnCli
         }
 
         var targetDirectory = Path.Combine(projectRoot, "Components", "UI");
-        var targetPath = Path.Combine(targetDirectory, component.FileName);
-        var exists = File.Exists(targetPath);
-        if (exists && !parse.Force)
+        var globalsCssPath = Path.Combine(projectRoot, "Styles", "globals.css");
+        var globalsCssResult = await WriteGlobalsCssAsync(globalsCssPath);
+        var fileOperations = component.FileNames
+            .Select(fileName => new ComponentFileOperation(
+                fileName,
+                Path.Combine(targetDirectory, fileName),
+                BuildComponentUrl(component, fileName)))
+            .ToArray();
+        var existingFiles = fileOperations
+            .Where(operation => File.Exists(operation.TargetPath))
+            .ToArray();
+
+        var hasExistingFiles = existingFiles.Length > 0;
+        if (hasExistingFiles && !parse.Force)
         {
-            Console.WriteLine($"{component.FileName} already exists.");
+            Console.WriteLine($"Component files already exist: {string.Join(", ", existingFiles.Select(file => file.FileName))}");
             Console.WriteLine("Skipping installation. Re-run with --force to overwrite.");
             return 0;
         }
 
-        var componentUrl = BuildComponentUrl(component);
         if (parse.DryRun)
         {
-            Console.WriteLine($"{(exists ? "Would overwrite" : "Would add")} {Path.GetRelativePath(projectRoot, targetPath)}");
-            Console.WriteLine($"Source: {componentUrl}");
+            foreach (var operation in fileOperations)
+            {
+                Console.WriteLine($"{(File.Exists(operation.TargetPath) ? "Would overwrite" : "Would add")} {Path.GetRelativePath(projectRoot, operation.TargetPath)}");
+                Console.WriteLine($"Source: {operation.SourceUrl}");
+            }
             return 0;
         }
 
@@ -197,12 +311,19 @@ internal static partial class BlazorShadcnCli
 
         try
         {
-            var componentContent = await DownloadComponentAsync(componentUrl);
-            await File.WriteAllTextAsync(targetPath, componentContent, Utf8NoBom);
+            foreach (var operation in fileOperations)
+            {
+                var componentContent = await DownloadComponentAsync(operation.SourceUrl);
+                await File.WriteAllTextAsync(operation.TargetPath, componentContent, Utf8NoBom);
+            }
         }
         catch (HttpRequestException exception) when (exception.StatusCode == HttpStatusCode.NotFound)
         {
-            Console.Error.WriteLine($"Component source was not found at {componentUrl}");
+            var missingUrl = fileOperations
+                .Select(operation => operation.SourceUrl)
+                .FirstOrDefault(url => string.Equals(url, exception.Data["url"] as string, StringComparison.Ordinal))
+                ?? "the requested source URL";
+            Console.Error.WriteLine($"Component source was not found at {missingUrl}");
             return 1;
         }
         catch (Exception exception)
@@ -211,7 +332,27 @@ internal static partial class BlazorShadcnCli
             return 1;
         }
 
-        Console.WriteLine($"{(exists ? "Updated" : "Added")} {component.DisplayName} at {Path.GetRelativePath(projectRoot, targetPath)}");
+        var action = hasExistingFiles ? "Updated" : "Added";
+        var installedFiles = string.Join(", ", fileOperations.Select(operation => Path.GetRelativePath(projectRoot, operation.TargetPath)));
+        Console.WriteLine($"{action} {component.DisplayName} files at {installedFiles}");
+        if (globalsCssResult.Status is not FileChangeStatus.Unchanged)
+        {
+            Console.WriteLine(globalsCssResult.Message);
+        }
+
+        if (string.Equals(component.Name, "accordion", StringComparison.OrdinalIgnoreCase))
+        {
+            var appRazorPath = Path.Combine(projectRoot, "Components", "App.razor");
+            var renderModeResult = await EnsureAccordionInteractivityAsync(appRazorPath);
+            if (!renderModeResult.Success)
+            {
+                Console.Error.WriteLine(renderModeResult.Message);
+                return 1;
+            }
+
+            Console.WriteLine(renderModeResult.Message);
+        }
+
         return 0;
     }
 
@@ -484,12 +625,17 @@ internal static partial class BlazorShadcnCli
             await CheckRemoteAsync("nuget-version-feed", $"https://api.nuget.org/v3-flatcontainer/{PackageId.ToLowerInvariant()}/index.json", "NuGet version feed"),
         };
 
-        foreach (var component in Components.Values.OrderBy(component => component.Name, StringComparer.OrdinalIgnoreCase))
+        foreach (var component in Components.Values
+                     .DistinctBy(component => component.Name, StringComparer.OrdinalIgnoreCase)
+                     .OrderBy(component => component.Name, StringComparer.OrdinalIgnoreCase))
         {
-            checks.Add(await CheckRemoteAsync(
-                $"component-{component.Name}",
-                BuildComponentUrl(component),
-                $"Component source ({component.Name})"));
+            foreach (var fileName in component.FileNames)
+            {
+                checks.Add(await CheckRemoteAsync(
+                    $"component-{component.Name}-{fileName.ToLowerInvariant().Replace('.', '-')}",
+                    BuildComponentUrl(component, fileName),
+                    $"Component source ({component.Name}/{fileName})"));
+            }
         }
 
         var hasError = checks.Any(check => check.Status == "error");
@@ -678,20 +824,27 @@ internal static partial class BlazorShadcnCli
         return commandName is not "version";
     }
 
-    private static string BuildComponentUrl(ComponentDefinition component)
+    private static string BuildComponentUrl(ComponentDefinition component, string fileName)
     {
         var repository = Environment.GetEnvironmentVariable("BLAZOR_SHADCN_REPOSITORY");
         if (!string.IsNullOrWhiteSpace(repository))
         {
-            return $"https://raw.githubusercontent.com/{repository.Trim().Trim('/')}/{DefaultRepositoryBranch}/components/{component.Name}/{component.FileName}";
+            return $"https://raw.githubusercontent.com/{repository.Trim().Trim('/')}/{DefaultRepositoryBranch}/components/{component.Name}/{fileName}";
         }
 
-        return $"https://raw.githubusercontent.com/{DefaultRepositoryOwner}/{DefaultRepositoryName}/{DefaultRepositoryBranch}/components/{component.Name}/{component.FileName}";
+        return $"https://raw.githubusercontent.com/{DefaultRepositoryOwner}/{DefaultRepositoryName}/{DefaultRepositoryBranch}/components/{component.Name}/{fileName}";
     }
 
     private static async Task<string> DownloadComponentAsync(string url)
     {
         using var response = await HttpClient.GetAsync(url);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            var exception = new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).", null, response.StatusCode);
+            exception.Data["url"] = url;
+            throw exception;
+        }
+
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsStringAsync();
     }
@@ -719,7 +872,7 @@ internal static partial class BlazorShadcnCli
 
     private static async Task<StepResult> WriteGlobalsCssAsync(string globalsCssPath)
     {
-        const string globalsCss = """
+        var globalsCss = """
             @import "tailwindcss";
 
             @source "../Components/**/*.razor";
@@ -738,6 +891,8 @@ internal static partial class BlazorShadcnCli
               --color-primary-foreground: var(--primary-foreground);
               --color-secondary: var(--secondary);
               --color-secondary-foreground: var(--secondary-foreground);
+              --color-muted: var(--muted);
+              --color-muted-foreground: var(--muted-foreground);
               --color-accent: var(--accent);
               --color-accent-foreground: var(--accent-foreground);
               --color-destructive: var(--destructive);
@@ -754,6 +909,8 @@ internal static partial class BlazorShadcnCli
               --primary-foreground: oklch(0.985 0 0);
               --secondary: oklch(0.97 0 0);
               --secondary-foreground: oklch(0.205 0 0);
+              --muted: oklch(0.97 0 0);
+              --muted-foreground: oklch(0.556 0 0);
               --accent: oklch(0.97 0 0);
               --accent-foreground: oklch(0.205 0 0);
               --destructive: oklch(0.577 0.245 27.325);
@@ -769,6 +926,8 @@ internal static partial class BlazorShadcnCli
               --primary-foreground: oklch(0.205 0 0);
               --secondary: oklch(0.269 0 0);
               --secondary-foreground: oklch(0.985 0 0);
+              --muted: oklch(0.269 0 0);
+              --muted-foreground: oklch(0.708 0 0);
               --accent: oklch(0.371 0 0);
               --accent-foreground: oklch(0.985 0 0);
               --destructive: oklch(0.704 0.191 22.216);
@@ -789,13 +948,96 @@ internal static partial class BlazorShadcnCli
             }
             """;
 
-        if (File.Exists(globalsCssPath))
+        if (!File.Exists(globalsCssPath))
         {
-            return new(FileChangeStatus.Unchanged, "Styles/globals.css already exists. Skipping to avoid overwriting existing styles.");
+            var directory = Path.GetDirectoryName(globalsCssPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            await File.WriteAllTextAsync(globalsCssPath, globalsCss + Environment.NewLine, Utf8NoBom);
+            return new(FileChangeStatus.Created, "Created Styles/globals.css.");
         }
 
-        await File.WriteAllTextAsync(globalsCssPath, globalsCss + Environment.NewLine, Utf8NoBom);
-        return new(FileChangeStatus.Created, "Created Styles/globals.css.");
+        var existingContent = NormalizeLineEndings(await File.ReadAllTextAsync(globalsCssPath));
+        var updatedContent = existingContent;
+        var changed = false;
+
+        updatedContent = EnsureCssBlockVariables(updatedContent, "@theme inline", ThemeInlineTokenLines, out var themeChanged) ?? updatedContent;
+        changed |= themeChanged;
+
+        updatedContent = EnsureCssBlockVariables(updatedContent, ":root", RootThemeTokenLines, out var rootChanged) ?? updatedContent;
+        changed |= rootChanged;
+
+        updatedContent = EnsureCssBlockVariables(updatedContent, ".dark", DarkThemeTokenLines, out var darkChanged) ?? updatedContent;
+        changed |= darkChanged;
+
+        if (!changed)
+        {
+            return new(FileChangeStatus.Unchanged, "Styles/globals.css already contains the required theme tokens.");
+        }
+
+        await File.WriteAllTextAsync(globalsCssPath, updatedContent + Environment.NewLine, Utf8NoBom);
+        return new(FileChangeStatus.Updated, "Updated Styles/globals.css with missing theme tokens.");
+    }
+
+    private static string? EnsureCssBlockVariables(string content, string selector, IReadOnlyList<string> variableLines, out bool changed)
+    {
+        changed = false;
+        var blockStart = content.IndexOf(selector, StringComparison.Ordinal);
+        if (blockStart < 0)
+        {
+            return null;
+        }
+
+        var openingBrace = content.IndexOf('{', blockStart);
+        if (openingBrace < 0)
+        {
+            return null;
+        }
+
+        var closingBrace = FindMatchingBrace(content, openingBrace);
+        if (closingBrace < 0)
+        {
+            return null;
+        }
+
+        var blockContent = content[(openingBrace + 1)..closingBrace];
+        var missingLines = variableLines
+            .Where(line => !blockContent.Contains(line[..line.IndexOf(':')], StringComparison.Ordinal))
+            .Select(line => $"  {line}")
+            .ToArray();
+        if (missingLines.Length == 0)
+        {
+            return content;
+        }
+
+        changed = true;
+        var insertion = Environment.NewLine + string.Join(Environment.NewLine, missingLines);
+        return content.Insert(closingBrace, insertion);
+    }
+
+    private static int FindMatchingBrace(string content, int openingBraceIndex)
+    {
+        var depth = 0;
+        for (var index = openingBraceIndex; index < content.Length; index++)
+        {
+            if (content[index] == '{')
+            {
+                depth++;
+            }
+            else if (content[index] == '}')
+            {
+                depth--;
+                if (depth == 0)
+                {
+                    return index;
+                }
+            }
+        }
+
+        return -1;
     }
 
     private static async Task<MultiMessageStepResult> EnsureImportsRazorAsync(string directory)
@@ -1211,6 +1453,54 @@ internal static partial class BlazorShadcnCli
         }
 
         return Task.FromResult(new ContentResult(true, content.Replace(existingTag, newTag, StringComparison.Ordinal), string.Empty));
+    }
+
+    private static async Task<CommandResult> EnsureAccordionInteractivityAsync(string appRazorPath)
+    {
+        if (!File.Exists(appRazorPath))
+        {
+            return new(false, "Accordion requires Components/App.razor so interactive render mode can be configured.");
+        }
+
+        var originalContent = NormalizeLineEndings(await File.ReadAllTextAsync(appRazorPath));
+        if (!HeadOutletTagRegex().IsMatch(originalContent))
+        {
+            return new(false, "Accordion requires a <HeadOutlet /> entry in Components/App.razor.");
+        }
+
+        if (!RoutesTagRegex().IsMatch(originalContent))
+        {
+            return new(false, "Accordion requires a <Routes /> entry in Components/App.razor.");
+        }
+
+        var updatedContent = AddInteractiveRenderModeIfMissing(originalContent, HeadOutletTagRegex(), out var headOutletChanged);
+        updatedContent = AddInteractiveRenderModeIfMissing(updatedContent, RoutesTagRegex(), out var routesChanged);
+
+        if (!headOutletChanged && !routesChanged)
+        {
+            return new(true, "Components/App.razor already contains interactive render mode for accordion.");
+        }
+
+        await File.WriteAllTextAsync(appRazorPath, updatedContent + Environment.NewLine, Utf8NoBom);
+        return new(true, "Updated Components/App.razor with interactive render mode for accordion.");
+    }
+
+    private static string AddInteractiveRenderModeIfMissing(string content, Regex tagRegex, out bool changed)
+    {
+        var didChange = false;
+        var updatedContent = tagRegex.Replace(content, match =>
+        {
+            var attrs = match.Groups["attrs"].Value;
+            if (attrs.Contains("@rendermode", StringComparison.OrdinalIgnoreCase))
+            {
+                return match.Value;
+            }
+
+            didChange = true;
+            return $"<{match.Groups["tag"].Value}{attrs} @rendermode=\"{AccordionRenderMode}\" />";
+        }, 1);
+        changed = didChange;
+        return updatedContent;
     }
 
     private static async Task<CommandResult> RunProcessAsync(string workingDirectory, string fileName, string arguments, string successMessage, string failureMessage)
@@ -1661,12 +1951,20 @@ internal static partial class BlazorShadcnCli
     [GeneratedRegex("class\\s*=\\s*\"(?<value>[^\"]*)\"", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex BodyClassRegex();
 
+    [GeneratedRegex("<(?<tag>HeadOutlet)(?<attrs>[^>]*)\\s*/>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex HeadOutletTagRegex();
+
+    [GeneratedRegex("<(?<tag>Routes)(?<attrs>[^>]*)\\s*/>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex RoutesTagRegex();
+
     private sealed record ParsedInvocation(bool Success, bool ShowVersionOnly, ParsedCommand? Command, string ErrorMessage);
     private sealed record ParsedCommand(string Name, string[] Arguments);
-    private sealed record ComponentDefinition(string Name, string FileName, string Description)
+    private sealed record ComponentDefinition(string Name, string[] FileNames, string Description)
     {
+        public string PrimaryFileName => FileNames[0];
         public string DisplayName => Name[..1].ToUpperInvariant() + Name[1..];
     }
+    private sealed record ComponentFileOperation(string FileName, string TargetPath, string SourceUrl);
 
     private sealed record AddOptions(bool Success, string? ComponentName, bool Force, bool DryRun, string ErrorMessage);
     private sealed record InitOptions(bool Success, bool Yes, bool RemoveBootstrapReferences, bool SkipInstall, bool DryRun, string ErrorMessage);
