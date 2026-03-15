@@ -6,7 +6,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>blazor-shadcn</ToolCommandName>
     <PackageId>blazor-shadcn</PackageId>
-    <Version>0.2.12</Version>
+    <Version>0.2.28</Version>
     <Authors>Justin Gerber</Authors>
     <Description>CLI for creating and configuring Blazor projects with shadcn-style components.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

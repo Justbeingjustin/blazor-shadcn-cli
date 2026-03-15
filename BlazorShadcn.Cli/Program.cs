@@ -85,11 +85,73 @@ internal static partial class BlazorShadcnCli
             "AccordionTrigger.razor",
         ],
         "Collapsible content sections.");
+    private static readonly ComponentDefinition ToggleComponent = new(
+        "toggle",
+        ["Toggle.razor"],
+        "Two-state pressed button.");
+    private static readonly ComponentDefinition ToggleGroupComponent = new(
+        "toggle-group",
+        [
+            "ToggleGroup.razor",
+            "ToggleGroupContext.cs",
+            "ToggleGroupItem.razor",
+        ],
+        "Single or multiple selection toggle group.",
+        ["toggle"]);
     private static readonly IReadOnlyDictionary<string, ComponentDefinition> Components =
         new Dictionary<string, ComponentDefinition>(StringComparer.OrdinalIgnoreCase)
         {
             ["accordion"] = AccordionComponent,
             ["accordian"] = AccordionComponent,
+            ["alert"] = new(
+                "alert",
+                [
+                    "Alert.razor",
+                    "AlertAction.razor",
+                    "AlertDescription.razor",
+                    "AlertTitle.razor",
+                ],
+                "Alert banner with title, description, and action."),
+            ["alert-dialog"] = new(
+                "alert-dialog",
+                [
+                    "AlertDialog.razor",
+                    "AlertDialogAction.razor",
+                    "AlertDialogCancel.razor",
+                    "AlertDialogContent.razor",
+                    "AlertDialogDescription.razor",
+                    "AlertDialogFooter.razor",
+                    "AlertDialogHeader.razor",
+                    "AlertDialogMedia.razor",
+                    "AlertDialogTitle.razor",
+                    "AlertDialogTrigger.razor",
+                ],
+                "Modal dialog for confirming destructive or high-impact actions.",
+                ["button"]),
+            ["alertdialog"] = new(
+                "alert-dialog",
+                [
+                    "AlertDialog.razor",
+                    "AlertDialogAction.razor",
+                    "AlertDialogCancel.razor",
+                    "AlertDialogContent.razor",
+                    "AlertDialogDescription.razor",
+                    "AlertDialogFooter.razor",
+                    "AlertDialogHeader.razor",
+                    "AlertDialogMedia.razor",
+                    "AlertDialogTitle.razor",
+                    "AlertDialogTrigger.razor",
+                ],
+                "Modal dialog for confirming destructive or high-impact actions.",
+                ["button"]),
+            ["aspect-ratio"] = new(
+                "aspect-ratio",
+                ["AspectRatio.razor"],
+                "Responsive aspect ratio container."),
+            ["aspectratio"] = new(
+                "aspect-ratio",
+                ["AspectRatio.razor"],
+                "Responsive aspect ratio container."),
             ["avatar"] = new(
                 "avatar",
                 [
@@ -104,6 +166,24 @@ internal static partial class BlazorShadcnCli
                 "Profile image with fallback, badge, and grouping support."),
             ["badge"] = new("badge", ["Badge.razor"], "Simple status badge."),
             ["button"] = new("button", ["Button.razor"], "Configurable action button."),
+            ["button-group"] = new(
+                "button-group",
+                [
+                    "ButtonGroup.razor",
+                    "ButtonGroupSeparator.razor",
+                    "ButtonGroupText.razor",
+                ],
+                "Grouped buttons with separators and inline text.",
+                ["separator"]),
+            ["buttongroup"] = new(
+                "button-group",
+                [
+                    "ButtonGroup.razor",
+                    "ButtonGroupSeparator.razor",
+                    "ButtonGroupText.razor",
+                ],
+                "Grouped buttons with separators and inline text.",
+                ["separator"]),
             ["card"] = new(
                 "card",
                 [
@@ -118,9 +198,46 @@ internal static partial class BlazorShadcnCli
                 "Structured content container."),
             ["checkbox"] = new("checkbox", ["Checkbox.razor"], "Selectable checkbox control."),
             ["input"] = new("input", ["Input.razor"], "Text input field."),
+            ["kbd"] = new(
+                "kbd",
+                [
+                    "Kbd.razor",
+                    "KbdGroup.razor",
+                ],
+                "Keyboard key labels and grouped shortcuts."),
             ["label"] = new("label", ["Label.razor"], "Text label for form controls."),
+            ["scroll-area"] = new(
+                "scroll-area",
+                [
+                    "ScrollArea.razor",
+                    "ScrollBar.razor",
+                ],
+                "Custom scroll container with matching scrollbar."),
+            ["scrollarea"] = new(
+                "scroll-area",
+                [
+                    "ScrollArea.razor",
+                    "ScrollBar.razor",
+                ],
+                "Custom scroll container with matching scrollbar."),
             ["separator"] = new("separator", ["Separator.razor"], "Visual divider."),
+            ["skeleton"] = new("skeleton", ["Skeleton.razor"], "Placeholder loading surface."),
             ["spinner"] = new("spinner", ["Spinner.razor"], "Loading indicator."),
+            ["switch"] = new("switch", ["Switch.razor"], "Toggle switch control."),
+            ["toggle"] = ToggleComponent,
+            ["toggle-group"] = ToggleGroupComponent,
+            ["togglegroup"] = ToggleGroupComponent,
+            ["tooltip"] = new(
+                "tooltip",
+                [
+                    "Tooltip.razor",
+                    "TooltipContent.razor",
+                    "TooltipProviderContext.cs",
+                    "TooltipProvider.razor",
+                    "TooltipTrigger.razor",
+                ],
+                "Hover and focus tooltip primitives."),
+            ["textarea"] = new("textarea", ["Textarea.razor"], "Multi-line text input."),
             ["typography"] = new("typography", ["Typography.razor"], "Typography primitives and styles."),
         };
 
@@ -279,71 +396,32 @@ internal static partial class BlazorShadcnCli
         var targetDirectory = Path.Combine(projectRoot, "Components", "UI");
         var globalsCssPath = Path.Combine(projectRoot, "Styles", "globals.css");
         var globalsCssResult = await WriteGlobalsCssAsync(globalsCssPath);
-        var fileOperations = component.FileNames
-            .Select(fileName => new ComponentFileOperation(
-                fileName,
-                Path.Combine(targetDirectory, fileName),
-                BuildComponentUrl(component, fileName)))
-            .ToArray();
-        var existingFiles = fileOperations
-            .Where(operation => File.Exists(operation.TargetPath))
-            .ToArray();
+        var componentsToInstall = ResolveInstallOrder(component).ToArray();
 
-        var hasExistingFiles = existingFiles.Length > 0;
-        if (hasExistingFiles && !parse.Force)
+        foreach (var componentToInstall in componentsToInstall)
         {
-            Console.WriteLine($"Component files already exist: {string.Join(", ", existingFiles.Select(file => file.FileName))}");
-            Console.WriteLine("Skipping installation. Re-run with --force to overwrite.");
-            return 0;
-        }
-
-        if (parse.DryRun)
-        {
-            foreach (var operation in fileOperations)
+            var installResult = await InstallComponentFilesAsync(componentToInstall, projectRoot, targetDirectory, parse.Force, parse.DryRun);
+            if (!installResult.Success)
             {
-                Console.WriteLine($"{(File.Exists(operation.TargetPath) ? "Would overwrite" : "Would add")} {Path.GetRelativePath(projectRoot, operation.TargetPath)}");
-                Console.WriteLine($"Source: {operation.SourceUrl}");
+                Console.Error.WriteLine(installResult.Message);
+                return 1;
             }
-            return 0;
-        }
 
-        Directory.CreateDirectory(targetDirectory);
-
-        try
-        {
-            foreach (var operation in fileOperations)
+            if (!string.IsNullOrWhiteSpace(installResult.Message))
             {
-                var componentContent = await DownloadComponentAsync(operation.SourceUrl);
-                await File.WriteAllTextAsync(operation.TargetPath, componentContent, Utf8NoBom);
+                Console.WriteLine(installResult.Message);
             }
         }
-        catch (HttpRequestException exception) when (exception.StatusCode == HttpStatusCode.NotFound)
-        {
-            var missingUrl = fileOperations
-                .Select(operation => operation.SourceUrl)
-                .FirstOrDefault(url => string.Equals(url, exception.Data["url"] as string, StringComparison.Ordinal))
-                ?? "the requested source URL";
-            Console.Error.WriteLine($"Component source was not found at {missingUrl}");
-            return 1;
-        }
-        catch (Exception exception)
-        {
-            Console.Error.WriteLine($"Failed to download {component.Name}: {exception.Message}");
-            return 1;
-        }
 
-        var action = hasExistingFiles ? "Updated" : "Added";
-        var installedFiles = string.Join(", ", fileOperations.Select(operation => Path.GetRelativePath(projectRoot, operation.TargetPath)));
-        Console.WriteLine($"{action} {component.DisplayName} files at {installedFiles}");
         if (globalsCssResult.Status is not FileChangeStatus.Unchanged)
         {
             Console.WriteLine(globalsCssResult.Message);
         }
 
-        if (string.Equals(component.Name, "accordion", StringComparison.OrdinalIgnoreCase))
+        if (componentsToInstall.Any(componentToInstall => RequiresInteractiveRenderMode(componentToInstall.Name)))
         {
             var appRazorPath = Path.Combine(projectRoot, "Components", "App.razor");
-            var renderModeResult = await EnsureAccordionInteractivityAsync(appRazorPath);
+            var renderModeResult = await EnsureComponentInteractivityAsync(appRazorPath, component.DisplayName);
             if (!renderModeResult.Success)
             {
                 Console.Error.WriteLine(renderModeResult.Message);
@@ -833,6 +911,94 @@ internal static partial class BlazorShadcnCli
         }
 
         return $"https://raw.githubusercontent.com/{DefaultRepositoryOwner}/{DefaultRepositoryName}/{DefaultRepositoryBranch}/components/{component.Name}/{fileName}";
+    }
+
+    private static IEnumerable<ComponentDefinition> ResolveInstallOrder(ComponentDefinition component)
+    {
+        var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var dependency in ResolveInstallOrderCore(component, visited))
+        {
+            yield return dependency;
+        }
+    }
+
+    private static IEnumerable<ComponentDefinition> ResolveInstallOrderCore(ComponentDefinition component, HashSet<string> visited)
+    {
+        if (!visited.Add(component.Name))
+        {
+            yield break;
+        }
+
+        foreach (var dependencyName in component.Dependencies)
+        {
+            if (!Components.TryGetValue(dependencyName, out var dependency))
+            {
+                throw new InvalidOperationException($"Component dependency '{dependencyName}' is not registered.");
+            }
+
+            foreach (var transitiveDependency in ResolveInstallOrderCore(dependency, visited))
+            {
+                yield return transitiveDependency;
+            }
+        }
+
+        yield return component;
+    }
+
+    private static async Task<ComponentInstallResult> InstallComponentFilesAsync(ComponentDefinition component, string projectRoot, string targetDirectory, bool force, bool dryRun)
+    {
+        var fileOperations = component.FileNames
+            .Select(fileName => new ComponentFileOperation(
+                fileName,
+                Path.Combine(targetDirectory, fileName),
+                BuildComponentUrl(component, fileName)))
+            .ToArray();
+        var existingFiles = fileOperations
+            .Where(operation => File.Exists(operation.TargetPath))
+            .ToArray();
+
+        if (existingFiles.Length > 0 && !force)
+        {
+            return new(true, $"Component files already exist for {component.Name}: {string.Join(", ", existingFiles.Select(file => file.FileName))}. Skipping. Re-run with --force to overwrite.");
+        }
+
+        if (dryRun)
+        {
+            foreach (var operation in fileOperations)
+            {
+                Console.WriteLine($"{(File.Exists(operation.TargetPath) ? "Would overwrite" : "Would add")} {Path.GetRelativePath(projectRoot, operation.TargetPath)}");
+                Console.WriteLine($"Source: {operation.SourceUrl}");
+            }
+
+            return new(true, string.Empty);
+        }
+
+        Directory.CreateDirectory(targetDirectory);
+
+        try
+        {
+            foreach (var operation in fileOperations)
+            {
+                var componentContent = await DownloadComponentAsync(operation.SourceUrl);
+                await File.WriteAllTextAsync(operation.TargetPath, componentContent, Utf8NoBom);
+            }
+        }
+        catch (HttpRequestException exception) when (exception.StatusCode == HttpStatusCode.NotFound)
+        {
+            var missingUrl = fileOperations
+                .Select(operation => operation.SourceUrl)
+                .FirstOrDefault(url => string.Equals(url, exception.Data["url"] as string, StringComparison.Ordinal))
+                ?? "the requested source URL";
+            return new(false, $"Component source was not found at {missingUrl}");
+        }
+        catch (Exception exception)
+        {
+            return new(false, $"Failed to download {component.Name}: {exception.Message}");
+        }
+
+        var action = existingFiles.Length > 0 ? "Updated" : "Added";
+        var installedFiles = string.Join(", ", fileOperations.Select(operation => Path.GetRelativePath(projectRoot, operation.TargetPath)));
+        return new(true, $"{action} {component.DisplayName} files at {installedFiles}");
     }
 
     private static async Task<string> DownloadComponentAsync(string url)
@@ -1455,22 +1621,30 @@ internal static partial class BlazorShadcnCli
         return Task.FromResult(new ContentResult(true, content.Replace(existingTag, newTag, StringComparison.Ordinal), string.Empty));
     }
 
-    private static async Task<CommandResult> EnsureAccordionInteractivityAsync(string appRazorPath)
+    private static bool RequiresInteractiveRenderMode(string componentName)
+        => string.Equals(componentName, "accordion", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "alert-dialog", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "switch", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "toggle", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "toggle-group", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "tooltip", StringComparison.OrdinalIgnoreCase);
+
+    private static async Task<CommandResult> EnsureComponentInteractivityAsync(string appRazorPath, string componentDisplayName)
     {
         if (!File.Exists(appRazorPath))
         {
-            return new(false, "Accordion requires Components/App.razor so interactive render mode can be configured.");
+            return new(false, $"{componentDisplayName} requires Components/App.razor so interactive render mode can be configured.");
         }
 
         var originalContent = NormalizeLineEndings(await File.ReadAllTextAsync(appRazorPath));
         if (!HeadOutletTagRegex().IsMatch(originalContent))
         {
-            return new(false, "Accordion requires a <HeadOutlet /> entry in Components/App.razor.");
+            return new(false, $"{componentDisplayName} requires a <HeadOutlet /> entry in Components/App.razor.");
         }
 
         if (!RoutesTagRegex().IsMatch(originalContent))
         {
-            return new(false, "Accordion requires a <Routes /> entry in Components/App.razor.");
+            return new(false, $"{componentDisplayName} requires a <Routes /> entry in Components/App.razor.");
         }
 
         var updatedContent = AddInteractiveRenderModeIfMissing(originalContent, HeadOutletTagRegex(), out var headOutletChanged);
@@ -1478,11 +1652,11 @@ internal static partial class BlazorShadcnCli
 
         if (!headOutletChanged && !routesChanged)
         {
-            return new(true, "Components/App.razor already contains interactive render mode for accordion.");
+            return new(true, $"Components/App.razor already contains interactive render mode for {componentDisplayName.ToLowerInvariant()}.");
         }
 
         await File.WriteAllTextAsync(appRazorPath, updatedContent + Environment.NewLine, Utf8NoBom);
-        return new(true, "Updated Components/App.razor with interactive render mode for accordion.");
+        return new(true, $"Updated Components/App.razor with interactive render mode for {componentDisplayName.ToLowerInvariant()}.");
     }
 
     private static string AddInteractiveRenderModeIfMissing(string content, Regex tagRegex, out bool changed)
@@ -1959,12 +2133,14 @@ internal static partial class BlazorShadcnCli
 
     private sealed record ParsedInvocation(bool Success, bool ShowVersionOnly, ParsedCommand? Command, string ErrorMessage);
     private sealed record ParsedCommand(string Name, string[] Arguments);
-    private sealed record ComponentDefinition(string Name, string[] FileNames, string Description)
+    private sealed record ComponentDefinition(string Name, string[] FileNames, string Description, string[]? DependencyNames = null)
     {
         public string PrimaryFileName => FileNames[0];
         public string DisplayName => Name[..1].ToUpperInvariant() + Name[1..];
+        public string[] Dependencies => DependencyNames ?? [];
     }
     private sealed record ComponentFileOperation(string FileName, string TargetPath, string SourceUrl);
+    private sealed record ComponentInstallResult(bool Success, string Message);
 
     private sealed record AddOptions(bool Success, string? ComponentName, bool Force, bool DryRun, string ErrorMessage);
     private sealed record InitOptions(bool Success, bool Yes, bool RemoveBootstrapReferences, bool SkipInstall, bool DryRun, string ErrorMessage);
