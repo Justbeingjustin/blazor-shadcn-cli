@@ -75,6 +75,28 @@ internal static partial class BlazorShadcnCli
         "--input: oklch(1 0 0 / 15%);",
         "--ring: oklch(0.556 0 0);",
     ];
+    private static readonly string[] SelectInteropScriptLines =
+    [
+        "    <script>",
+        "        window.blazorShadcnSelect = (function () {",
+        "            function position(trigger, content, positionMode) {",
+        "                if (!trigger || !content) return;",
+        "",
+        "                const rect = trigger.getBoundingClientRect();",
+        "                const isPopper = positionMode === 'popper';",
+        "                const minWidth = isPopper ? rect.width : Math.max(rect.width, 128);",
+        "                const top = rect.bottom + (isPopper ? 4 : 2);",
+        "                const left = rect.left;",
+        "",
+        "                content.style.top = `${top}px`;",
+        "                content.style.left = `${left}px`;",
+        "                content.style.minWidth = `${minWidth}px`;",
+        "            }",
+        "",
+        "            return { position };",
+        "        })();",
+        "    </script>",
+    ];
     private static readonly ComponentDefinition AccordionComponent = new(
         "accordion",
         [
@@ -197,6 +219,20 @@ internal static partial class BlazorShadcnCli
                 ],
                 "Structured content container."),
             ["checkbox"] = new("checkbox", ["Checkbox.razor"], "Selectable checkbox control."),
+            ["dialog"] = new(
+                "dialog",
+                [
+                    "Dialog.razor",
+                    "DialogClose.razor",
+                    "DialogContent.razor",
+                    "DialogContext.cs",
+                    "DialogDescription.razor",
+                    "DialogFooter.razor",
+                    "DialogHeader.razor",
+                    "DialogTitle.razor",
+                    "DialogTrigger.razor",
+                ],
+                "Modal dialog primitives with trigger, content, and close behavior."),
             ["input"] = new("input", ["Input.razor"], "Text input field."),
             ["kbd"] = new(
                 "kbd",
@@ -206,6 +242,42 @@ internal static partial class BlazorShadcnCli
                 ],
                 "Keyboard key labels and grouped shortcuts."),
             ["label"] = new("label", ["Label.razor"], "Text label for form controls."),
+            ["radio-group"] = new(
+                "radio-group",
+                [
+                    "RadioGroup.razor",
+                    "RadioGroupContext.cs",
+                    "RadioGroupItem.razor",
+                ],
+                "Radio button group with shared selection state."),
+            ["radiogroup"] = new(
+                "radio-group",
+                [
+                    "RadioGroup.razor",
+                    "RadioGroupContext.cs",
+                    "RadioGroupItem.razor",
+                ],
+                "Radio button group with shared selection state."),
+            ["select"] = new(
+                "select",
+                [
+                    "Select.razor",
+                    "SelectContent.razor",
+                    "SelectContext.cs",
+                    "SelectGroup.razor",
+                    "SelectItem.razor",
+                    "SelectLabel.razor",
+                    "SelectSeparator.razor",
+                    "SelectTrigger.razor",
+                    "SelectValue.razor",
+                ],
+                "Selectable listbox with trigger, content, and grouped items."),
+            ["slider"] = new(
+                "slider",
+                [
+                    "Slider.razor",
+                ],
+                "Single or multi-thumb range slider."),
             ["scroll-area"] = new(
                 "scroll-area",
                 [
@@ -429,6 +501,22 @@ internal static partial class BlazorShadcnCli
             }
 
             Console.WriteLine(renderModeResult.Message);
+        }
+
+        if (componentsToInstall.Any(componentToInstall => RequiresAppRazorScript(componentToInstall.Name)))
+        {
+            var appRazorPath = Path.Combine(projectRoot, "Components", "App.razor");
+            var scriptResult = await EnsureComponentAppRazorScriptAsync(appRazorPath, component.DisplayName, parse.DryRun);
+            if (!scriptResult.Success)
+            {
+                Console.Error.WriteLine(scriptResult.Message);
+                return 1;
+            }
+
+            if (!string.IsNullOrWhiteSpace(scriptResult.Message))
+            {
+                Console.WriteLine(scriptResult.Message);
+            }
         }
 
         return 0;
@@ -1624,10 +1712,16 @@ internal static partial class BlazorShadcnCli
     private static bool RequiresInteractiveRenderMode(string componentName)
         => string.Equals(componentName, "accordion", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "alert-dialog", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "dialog", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "select", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "slider", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "switch", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "toggle", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "toggle-group", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "tooltip", StringComparison.OrdinalIgnoreCase);
+
+    private static bool RequiresAppRazorScript(string componentName)
+        => string.Equals(componentName, "select", StringComparison.OrdinalIgnoreCase);
 
     private static async Task<CommandResult> EnsureComponentInteractivityAsync(string appRazorPath, string componentDisplayName)
     {
@@ -1657,6 +1751,36 @@ internal static partial class BlazorShadcnCli
 
         await File.WriteAllTextAsync(appRazorPath, updatedContent + Environment.NewLine, Utf8NoBom);
         return new(true, $"Updated Components/App.razor with interactive render mode for {componentDisplayName.ToLowerInvariant()}.");
+    }
+
+    private static async Task<CommandResult> EnsureComponentAppRazorScriptAsync(string appRazorPath, string componentDisplayName, bool dryRun)
+    {
+        if (!File.Exists(appRazorPath))
+        {
+            return new(false, $"{componentDisplayName} requires Components/App.razor so the required client-side script can be configured.");
+        }
+
+        var lines = (await File.ReadAllLinesAsync(appRazorPath)).ToList();
+        if (lines.Any(line => line.Contains("window.blazorShadcnSelect", StringComparison.Ordinal)))
+        {
+            return new(true, $"Components/App.razor already contains the required client-side script for {componentDisplayName.ToLowerInvariant()}.");
+        }
+
+        var bodyEnd = FindLineIndex(lines, "</body>");
+        if (bodyEnd < 0)
+        {
+            return new(false, $"{componentDisplayName} requires a </body> entry in Components/App.razor.");
+        }
+
+        if (dryRun)
+        {
+            return new(true, "Would update Components/App.razor with the required client-side script for select.");
+        }
+
+        lines.InsertRange(bodyEnd, SelectInteropScriptLines);
+        var updatedContent = NormalizeLineEndings(string.Join(Environment.NewLine, lines));
+        await File.WriteAllTextAsync(appRazorPath, updatedContent + Environment.NewLine, Utf8NoBom);
+        return new(true, $"Updated Components/App.razor with the required client-side script for {componentDisplayName.ToLowerInvariant()}.");
     }
 
     private static string AddInteractiveRenderModeIfMissing(string content, Regex tagRegex, out bool changed)
