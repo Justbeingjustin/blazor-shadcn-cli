@@ -233,6 +233,22 @@ internal static partial class BlazorShadcnCli
                     "DialogTrigger.razor",
                 ],
                 "Modal dialog primitives with trigger, content, and close behavior."),
+            ["field"] = new(
+                "field",
+                [
+                    "Field.razor",
+                    "FieldContent.razor",
+                    "FieldDescription.razor",
+                    "FieldError.razor",
+                    "FieldGroup.razor",
+                    "FieldLabel.razor",
+                    "FieldLegend.razor",
+                    "FieldSeparator.razor",
+                    "FieldSet.razor",
+                    "FieldTitle.razor",
+                ],
+                "Form field container.",
+                SourceDirectory: "BlazorShadcn/Components/UI"),
             ["input"] = new("input", ["Input.razor"], "Text input field."),
             ["kbd"] = new(
                 "kbd",
@@ -993,12 +1009,13 @@ internal static partial class BlazorShadcnCli
     private static string BuildComponentUrl(ComponentDefinition component, string fileName)
     {
         var repository = Environment.GetEnvironmentVariable("BLAZOR_SHADCN_REPOSITORY");
+        var sourceDirectory = component.SourceDirectory ?? $"components/{component.Name}";
         if (!string.IsNullOrWhiteSpace(repository))
         {
-            return $"https://raw.githubusercontent.com/{repository.Trim().Trim('/')}/{DefaultRepositoryBranch}/components/{component.Name}/{fileName}";
+            return $"https://raw.githubusercontent.com/{repository.Trim().Trim('/')}/{DefaultRepositoryBranch}/{sourceDirectory}/{fileName}";
         }
 
-        return $"https://raw.githubusercontent.com/{DefaultRepositoryOwner}/{DefaultRepositoryName}/{DefaultRepositoryBranch}/components/{component.Name}/{fileName}";
+        return $"https://raw.githubusercontent.com/{DefaultRepositoryOwner}/{DefaultRepositoryName}/{DefaultRepositoryBranch}/{sourceDirectory}/{fileName}";
     }
 
     private static IEnumerable<ComponentDefinition> ResolveInstallOrder(ComponentDefinition component)
@@ -2257,7 +2274,12 @@ internal static partial class BlazorShadcnCli
 
     private sealed record ParsedInvocation(bool Success, bool ShowVersionOnly, ParsedCommand? Command, string ErrorMessage);
     private sealed record ParsedCommand(string Name, string[] Arguments);
-    private sealed record ComponentDefinition(string Name, string[] FileNames, string Description, string[]? DependencyNames = null)
+    private sealed record ComponentDefinition(
+        string Name,
+        string[] FileNames,
+        string Description,
+        string[]? DependencyNames = null,
+        string? SourceDirectory = null)
     {
         public string PrimaryFileName => FileNames[0];
         public string DisplayName => Name[..1].ToUpperInvariant() + Name[1..];

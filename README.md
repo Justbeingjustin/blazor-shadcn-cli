@@ -17,6 +17,7 @@ blazor-shadcn add button
 blazor-shadcn add button-group
 blazor-shadcn add checkbox
 blazor-shadcn add dialog
+blazor-shadcn add field
 blazor-shadcn add kbd
 blazor-shadcn add radio-group
 blazor-shadcn add select
@@ -51,6 +52,7 @@ Run `blazor-shadcn help <command>` for command-specific options.
 - `card`
 - `checkbox`
 - `dialog`
+- `field`
 - `kbd`
 - `radio-group`
 - `select`
@@ -85,6 +87,7 @@ blazor-shadcn add button
 blazor-shadcn add button-group
 blazor-shadcn add checkbox
 blazor-shadcn add dialog
+blazor-shadcn add field
 blazor-shadcn add kbd
 blazor-shadcn add label
 blazor-shadcn add radio-group
@@ -115,6 +118,7 @@ blazor-shadcn add typography
 - `button-group` installs `Separator.razor`, `ButtonGroup.razor`, `ButtonGroupSeparator.razor`, and `ButtonGroupText.razor`.
 - `add button-group` installs `separator` first so the shared `Separator.razor` primitive is available.
 - `dialog` installs `Dialog.razor`, `DialogClose.razor`, `DialogContent.razor`, `DialogContext.cs`, `DialogDescription.razor`, `DialogFooter.razor`, `DialogHeader.razor`, `DialogTitle.razor`, and `DialogTrigger.razor`.
+- `field` installs `Field.razor`, `FieldContent.razor`, `FieldDescription.razor`, `FieldError.razor`, `FieldGroup.razor`, `FieldLabel.razor`, `FieldLegend.razor`, `FieldSeparator.razor`, `FieldSet.razor`, and `FieldTitle.razor`.
 - `kbd` installs `Kbd.razor` and `KbdGroup.razor`.
 - `radio-group` installs `RadioGroup.razor`, `RadioGroupContext.cs`, and `RadioGroupItem.razor`.
 - `select` installs `Select.razor`, `SelectContent.razor`, `SelectContext.cs`, `SelectGroup.razor`, `SelectItem.razor`, `SelectLabel.razor`, `SelectSeparator.razor`, `SelectTrigger.razor`, and `SelectValue.razor`.
@@ -152,7 +156,7 @@ dotnet pack BlazorShadcn.Cli\BlazorShadcn.Cli.csproj -c Release
 Install it from the local package source:
 
 ```powershell
-dotnet tool install --global blazor-shadcn --version 0.2.33 --configfile .\NuGet.Local.config
+dotnet tool install --global blazor-shadcn --version 0.2.37 --configfile .\NuGet.Local.config
 ```
 
 Run it:
@@ -170,6 +174,7 @@ blazor-shadcn add button
 blazor-shadcn add button-group
 blazor-shadcn add checkbox
 blazor-shadcn add dialog
+blazor-shadcn add field
 blazor-shadcn add kbd
 blazor-shadcn add label
 blazor-shadcn add radio-group
@@ -194,7 +199,7 @@ Update the installed tool after making changes:
 
 ```powershell
 dotnet pack BlazorShadcn.Cli\BlazorShadcn.Cli.csproj -c Release
-dotnet tool update --global blazor-shadcn --version 0.2.33 --configfile .\NuGet.Local.config
+dotnet tool update --global blazor-shadcn --version 0.2.37 --configfile .\NuGet.Local.config
 ```
 
 `add` depends on the component files existing in the source GitHub repository. By default the CLI uses `Justbeingjustin/blazor-shadcn` on the `main` branch. Set `BLAZOR_SHADCN_REPOSITORY` to use a different `<owner>/<repo>`.
