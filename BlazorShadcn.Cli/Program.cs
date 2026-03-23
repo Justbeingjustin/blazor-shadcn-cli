@@ -27,6 +27,10 @@ internal static partial class BlazorShadcnCli
         "--radius-lg: var(--radius);",
         "--color-background: var(--background);",
         "--color-foreground: var(--foreground);",
+        "--color-card: var(--card);",
+        "--color-card-foreground: var(--card-foreground);",
+        "--color-popover: var(--popover);",
+        "--color-popover-foreground: var(--popover-foreground);",
         "--color-primary: var(--primary);",
         "--color-primary-foreground: var(--primary-foreground);",
         "--color-secondary: var(--secondary);",
@@ -45,6 +49,10 @@ internal static partial class BlazorShadcnCli
         "--radius: 0.625rem;",
         "--background: oklch(1 0 0);",
         "--foreground: oklch(0.145 0 0);",
+        "--card: oklch(1 0 0);",
+        "--card-foreground: oklch(0.145 0 0);",
+        "--popover: oklch(1 0 0);",
+        "--popover-foreground: oklch(0.145 0 0);",
         "--primary: oklch(0.205 0 0);",
         "--primary-foreground: oklch(0.985 0 0);",
         "--secondary: oklch(0.97 0 0);",
@@ -62,6 +70,10 @@ internal static partial class BlazorShadcnCli
     [
         "--background: oklch(0.145 0 0);",
         "--foreground: oklch(0.985 0 0);",
+        "--card: oklch(0.205 0 0);",
+        "--card-foreground: oklch(0.985 0 0);",
+        "--popover: oklch(0.205 0 0);",
+        "--popover-foreground: oklch(0.985 0 0);",
         "--primary: oklch(0.922 0 0);",
         "--primary-foreground: oklch(0.205 0 0);",
         "--secondary: oklch(0.269 0 0);",
@@ -249,6 +261,46 @@ internal static partial class BlazorShadcnCli
                 ],
                 "Form field container.",
                 SourceDirectory: "BlazorShadcn/Components/UI"),
+            ["dropdown-menu"] = new(
+                "dropdown-menu",
+                [
+                    "DropdownMenu.razor",
+                    "DropdownMenuContent.razor",
+                    "DropdownMenuContext.cs",
+                    "DropdownMenuGroup.razor",
+                    "DropdownMenuItem.razor",
+                    "DropdownMenuLabel.razor",
+                    "DropdownMenuPortal.razor",
+                    "DropdownMenuSeparator.razor",
+                    "DropdownMenuShortcut.razor",
+                    "DropdownMenuSub.razor",
+                    "DropdownMenuSubContent.razor",
+                    "DropdownMenuSubContext.cs",
+                    "DropdownMenuSubGroupContext.cs",
+                    "DropdownMenuSubTrigger.razor",
+                    "DropdownMenuTrigger.razor",
+                ],
+                "Nested dropdown menu primitives with groups, submenus, and shortcuts."),
+            ["dropdownmenu"] = new(
+                "dropdown-menu",
+                [
+                    "DropdownMenu.razor",
+                    "DropdownMenuContent.razor",
+                    "DropdownMenuContext.cs",
+                    "DropdownMenuGroup.razor",
+                    "DropdownMenuItem.razor",
+                    "DropdownMenuLabel.razor",
+                    "DropdownMenuPortal.razor",
+                    "DropdownMenuSeparator.razor",
+                    "DropdownMenuShortcut.razor",
+                    "DropdownMenuSub.razor",
+                    "DropdownMenuSubContent.razor",
+                    "DropdownMenuSubContext.cs",
+                    "DropdownMenuSubGroupContext.cs",
+                    "DropdownMenuSubTrigger.razor",
+                    "DropdownMenuTrigger.razor",
+                ],
+                "Nested dropdown menu primitives with groups, submenus, and shortcuts."),
             ["input"] = new("input", ["Input.razor"], "Text input field."),
             ["kbd"] = new(
                 "kbd",
@@ -258,6 +310,19 @@ internal static partial class BlazorShadcnCli
                 ],
                 "Keyboard key labels and grouped shortcuts."),
             ["label"] = new("label", ["Label.razor"], "Text label for form controls."),
+            ["popover"] = new(
+                "popover",
+                [
+                    "Popover.razor",
+                    "PopoverAnchor.razor",
+                    "PopoverContent.razor",
+                    "PopoverContext.cs",
+                    "PopoverDescription.razor",
+                    "PopoverHeader.razor",
+                    "PopoverTitle.razor",
+                    "PopoverTrigger.razor",
+                ],
+                "Popover primitives with anchor, trigger, and structured content."),
             ["radio-group"] = new(
                 "radio-group",
                 [
@@ -1158,6 +1223,10 @@ internal static partial class BlazorShadcnCli
               --radius-lg: var(--radius);
               --color-background: var(--background);
               --color-foreground: var(--foreground);
+              --color-card: var(--card);
+              --color-card-foreground: var(--card-foreground);
+              --color-popover: var(--popover);
+              --color-popover-foreground: var(--popover-foreground);
               --color-primary: var(--primary);
               --color-primary-foreground: var(--primary-foreground);
               --color-secondary: var(--secondary);
@@ -1176,6 +1245,10 @@ internal static partial class BlazorShadcnCli
               --radius: 0.625rem;
               --background: oklch(1 0 0);
               --foreground: oklch(0.145 0 0);
+              --card: oklch(1 0 0);
+              --card-foreground: oklch(0.145 0 0);
+              --popover: oklch(1 0 0);
+              --popover-foreground: oklch(0.145 0 0);
               --primary: oklch(0.205 0 0);
               --primary-foreground: oklch(0.985 0 0);
               --secondary: oklch(0.97 0 0);
@@ -1193,6 +1266,10 @@ internal static partial class BlazorShadcnCli
             .dark {
               --background: oklch(0.145 0 0);
               --foreground: oklch(0.985 0 0);
+              --card: oklch(0.205 0 0);
+              --card-foreground: oklch(0.985 0 0);
+              --popover: oklch(0.205 0 0);
+              --popover-foreground: oklch(0.985 0 0);
               --primary: oklch(0.922 0 0);
               --primary-foreground: oklch(0.205 0 0);
               --secondary: oklch(0.269 0 0);
@@ -1730,6 +1807,8 @@ internal static partial class BlazorShadcnCli
         => string.Equals(componentName, "accordion", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "alert-dialog", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "dialog", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "dropdown-menu", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "popover", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "select", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "slider", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "switch", StringComparison.OrdinalIgnoreCase)

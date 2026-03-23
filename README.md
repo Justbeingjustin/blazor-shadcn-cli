@@ -18,8 +18,10 @@ blazor-shadcn add button-group
 blazor-shadcn add checkbox
 blazor-shadcn add dialog
 blazor-shadcn add field
+blazor-shadcn add dropdown-menu
 blazor-shadcn add kbd
 blazor-shadcn add radio-group
+blazor-shadcn add popover
 blazor-shadcn add select
 blazor-shadcn add slider
 blazor-shadcn add scroll-area
@@ -53,7 +55,9 @@ Run `blazor-shadcn help <command>` for command-specific options.
 - `checkbox`
 - `dialog`
 - `field`
+- `dropdown-menu`
 - `kbd`
+- `popover`
 - `radio-group`
 - `select`
 - `slider`
@@ -88,8 +92,10 @@ blazor-shadcn add button-group
 blazor-shadcn add checkbox
 blazor-shadcn add dialog
 blazor-shadcn add field
+blazor-shadcn add dropdown-menu
 blazor-shadcn add kbd
 blazor-shadcn add label
+blazor-shadcn add popover
 blazor-shadcn add radio-group
 blazor-shadcn add select
 blazor-shadcn add slider
@@ -119,7 +125,9 @@ blazor-shadcn add typography
 - `add button-group` installs `separator` first so the shared `Separator.razor` primitive is available.
 - `dialog` installs `Dialog.razor`, `DialogClose.razor`, `DialogContent.razor`, `DialogContext.cs`, `DialogDescription.razor`, `DialogFooter.razor`, `DialogHeader.razor`, `DialogTitle.razor`, and `DialogTrigger.razor`.
 - `field` installs `Field.razor`, `FieldContent.razor`, `FieldDescription.razor`, `FieldError.razor`, `FieldGroup.razor`, `FieldLabel.razor`, `FieldLegend.razor`, `FieldSeparator.razor`, `FieldSet.razor`, and `FieldTitle.razor`.
+- `dropdown-menu` installs `DropdownMenu.razor`, `DropdownMenuContent.razor`, `DropdownMenuContext.cs`, `DropdownMenuGroup.razor`, `DropdownMenuItem.razor`, `DropdownMenuLabel.razor`, `DropdownMenuPortal.razor`, `DropdownMenuSeparator.razor`, `DropdownMenuShortcut.razor`, `DropdownMenuSub.razor`, `DropdownMenuSubContent.razor`, `DropdownMenuSubContext.cs`, `DropdownMenuSubGroupContext.cs`, `DropdownMenuSubTrigger.razor`, and `DropdownMenuTrigger.razor`.
 - `kbd` installs `Kbd.razor` and `KbdGroup.razor`.
+- `popover` installs `Popover.razor`, `PopoverAnchor.razor`, `PopoverContent.razor`, `PopoverContext.cs`, `PopoverDescription.razor`, `PopoverHeader.razor`, `PopoverTitle.razor`, and `PopoverTrigger.razor`.
 - `radio-group` installs `RadioGroup.razor`, `RadioGroupContext.cs`, and `RadioGroupItem.razor`.
 - `select` installs `Select.razor`, `SelectContent.razor`, `SelectContext.cs`, `SelectGroup.razor`, `SelectItem.razor`, `SelectLabel.razor`, `SelectSeparator.razor`, `SelectTrigger.razor`, and `SelectValue.razor`.
 - `add select` also ensures `Components/App.razor` contains the `window.blazorShadcnSelect.position` script used to position the dropdown content.
@@ -133,7 +141,7 @@ blazor-shadcn add typography
 - `add toggle-group` installs `toggle` first so shared toggle primitives come from the `toggle` component source.
 - `tooltip` installs `Tooltip.razor`, `TooltipContent.razor`, `TooltipProviderContext.cs`, `TooltipProvider.razor`, and `TooltipTrigger.razor`.
 - `textarea` installs `Textarea.razor`.
-- `add accordion`, `add alert-dialog`, `add dialog`, `add select`, `add slider`, `add switch`, `add toggle`, `add toggle-group`, and `add tooltip` also ensure `Components/App.razor` has interactive render mode on both `HeadOutlet` and `Routes`; other components do not change render mode configuration.
+- `add accordion`, `add alert-dialog`, `add dialog`, `add dropdown-menu`, `add popover`, `add select`, `add slider`, `add switch`, `add toggle`, `add toggle-group`, and `add tooltip` also ensure `Components/App.razor` has interactive render mode on both `HeadOutlet` and `Routes`; other components do not change render mode configuration.
 - `add --force` overwrites existing component files, and `add --dry-run` previews the action.
 - `new` creates a fresh Blazor app, removes the template demo content, configures Tailwind/fonts/imports, and leaves the project ready for `blazor-shadcn add <component>`.
 - `new --skip-install` skips `npm install`, and `new --dry-run` previews the action.
@@ -175,8 +183,10 @@ blazor-shadcn add button-group
 blazor-shadcn add checkbox
 blazor-shadcn add dialog
 blazor-shadcn add field
+blazor-shadcn add dropdown-menu
 blazor-shadcn add kbd
 blazor-shadcn add label
+blazor-shadcn add popover
 blazor-shadcn add radio-group
 blazor-shadcn add select
 blazor-shadcn add slider
