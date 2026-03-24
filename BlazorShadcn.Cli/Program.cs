@@ -1071,17 +1071,23 @@ internal static partial class BlazorShadcnCli
         return commandName is not "version";
     }
 
-    private static string BuildComponentUrl(ComponentDefinition component, string fileName)
+    private static string BuildComponentSourceDirectory(ComponentDefinition component)
+        => component.SourceDirectory ?? $"components/{component.Name}";
+
+    private static string BuildComponentBaseUrl(ComponentDefinition component)
     {
         var repository = Environment.GetEnvironmentVariable("BLAZOR_SHADCN_REPOSITORY");
-        var sourceDirectory = component.SourceDirectory ?? $"components/{component.Name}";
+        var sourceDirectory = BuildComponentSourceDirectory(component);
         if (!string.IsNullOrWhiteSpace(repository))
         {
-            return $"https://raw.githubusercontent.com/{repository.Trim().Trim('/')}/{DefaultRepositoryBranch}/{sourceDirectory}/{fileName}";
+            return $"https://raw.githubusercontent.com/{repository.Trim().Trim('/')}/{DefaultRepositoryBranch}/{sourceDirectory}";
         }
 
-        return $"https://raw.githubusercontent.com/{DefaultRepositoryOwner}/{DefaultRepositoryName}/{DefaultRepositoryBranch}/{sourceDirectory}/{fileName}";
+        return $"https://raw.githubusercontent.com/{DefaultRepositoryOwner}/{DefaultRepositoryName}/{DefaultRepositoryBranch}/{sourceDirectory}";
     }
+
+    private static string BuildComponentUrl(ComponentDefinition component, string fileName)
+        => $"{BuildComponentBaseUrl(component)}/{fileName}";
 
     private static IEnumerable<ComponentDefinition> ResolveInstallOrder(ComponentDefinition component)
     {
@@ -1168,7 +1174,7 @@ internal static partial class BlazorShadcnCli
 
         var action = existingFiles.Length > 0 ? "Updated" : "Added";
         var installedFiles = string.Join(", ", fileOperations.Select(operation => Path.GetRelativePath(projectRoot, operation.TargetPath)));
-        return new(true, $"{action} {component.DisplayName} files at {installedFiles}");
+        return new(true, $"{action} {component.DisplayName} files at {installedFiles}{Environment.NewLine}Source: {BuildComponentBaseUrl(component)}");
     }
 
     private static async Task<string> DownloadComponentAsync(string url)
