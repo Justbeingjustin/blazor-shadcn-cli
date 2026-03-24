@@ -52,8 +52,10 @@ Run `blazor-shadcn help <command>` for command-specific options.
 - `button`
 - `button-group`
 - `card`
+- `carousel`
 - `checkbox`
 - `dialog`
+- `empty`
 - `field`
 - `dropdown-menu`
 - `kbd`
@@ -89,8 +91,10 @@ blazor-shadcn add avatar
 blazor-shadcn add badge
 blazor-shadcn add button
 blazor-shadcn add button-group
+blazor-shadcn add carousel
 blazor-shadcn add checkbox
 blazor-shadcn add dialog
+blazor-shadcn add empty
 blazor-shadcn add field
 blazor-shadcn add dropdown-menu
 blazor-shadcn add kbd
@@ -113,7 +117,7 @@ blazor-shadcn add typography
 
 ## Notes
 
-- `add` installs component source files into `Components/UI` and ensures required theme tokens exist in `Styles/globals.css`.
+- `add` installs component source files into `Components/UI`, writes any required JavaScript assets into `wwwroot/blazor-shadcn`, and ensures required theme tokens exist in `Styles/globals.css`.
 - `accordion` installs `Accordion.razor`, `AccordionContent.razor`, `AccordionContext.cs`, `AccordionItem.razor`, and `AccordionTrigger.razor`.
 - `alert` installs `Alert.razor`, `AlertAction.razor`, `AlertDescription.razor`, and `AlertTitle.razor`.
 - `alert-dialog` installs `Button.razor`, `AlertDialog.razor`, `AlertDialogAction.razor`, `AlertDialogCancel.razor`, `AlertDialogContent.razor`, `AlertDialogDescription.razor`, `AlertDialogFooter.razor`, `AlertDialogHeader.razor`, `AlertDialogMedia.razor`, `AlertDialogTitle.razor`, and `AlertDialogTrigger.razor`.
@@ -123,7 +127,11 @@ blazor-shadcn add typography
 - `card` installs `Card.razor`, `CardAction.razor`, `CardContent.razor`, `CardDescription.razor`, `CardFooter.razor`, `CardHeader.razor`, and `CardTitle.razor`.
 - `button-group` installs `Separator.razor`, `ButtonGroup.razor`, `ButtonGroupSeparator.razor`, and `ButtonGroupText.razor`.
 - `add button-group` installs `separator` first so the shared `Separator.razor` primitive is available.
+- `carousel` installs `Button.razor`, `Carousel.razor`, `CarouselApi.cs`, `CarouselContent.razor`, `CarouselContext.cs`, `CarouselItem.razor`, `CarouselNext.razor`, `CarouselPrevious.razor`, and `carousel.js`.
+- `add carousel` also copies `carousel.js` to `wwwroot/blazor-shadcn` and ensures `Components/App.razor` loads it.
+- `add carousel` installs `button` first so the shared button primitive is available.
 - `dialog` installs `Dialog.razor`, `DialogClose.razor`, `DialogContent.razor`, `DialogContext.cs`, `DialogDescription.razor`, `DialogFooter.razor`, `DialogHeader.razor`, `DialogTitle.razor`, and `DialogTrigger.razor`.
+- `empty` installs `Empty.razor`, `EmptyContent.razor`, `EmptyDescription.razor`, `EmptyHeader.razor`, `EmptyMedia.razor`, and `EmptyTitle.razor`.
 - `field` installs `Field.razor`, `FieldContent.razor`, `FieldDescription.razor`, `FieldError.razor`, `FieldGroup.razor`, `FieldLabel.razor`, `FieldLegend.razor`, `FieldSeparator.razor`, `FieldSet.razor`, and `FieldTitle.razor`.
 - `dropdown-menu` installs `DropdownMenu.razor`, `DropdownMenuContent.razor`, `DropdownMenuContext.cs`, `DropdownMenuGroup.razor`, `DropdownMenuItem.razor`, `DropdownMenuLabel.razor`, `DropdownMenuPortal.razor`, `DropdownMenuSeparator.razor`, `DropdownMenuShortcut.razor`, `DropdownMenuSub.razor`, `DropdownMenuSubContent.razor`, `DropdownMenuSubContext.cs`, `DropdownMenuSubGroupContext.cs`, `DropdownMenuSubTrigger.razor`, and `DropdownMenuTrigger.razor`.
 - `kbd` installs `Kbd.razor` and `KbdGroup.razor`.
@@ -141,7 +149,7 @@ blazor-shadcn add typography
 - `add toggle-group` installs `toggle` first so shared toggle primitives come from the `toggle` component source.
 - `tooltip` installs `Tooltip.razor`, `TooltipContent.razor`, `TooltipProviderContext.cs`, `TooltipProvider.razor`, and `TooltipTrigger.razor`.
 - `textarea` installs `Textarea.razor`.
-- `add accordion`, `add alert-dialog`, `add dialog`, `add dropdown-menu`, `add popover`, `add select`, `add slider`, `add switch`, `add toggle`, `add toggle-group`, and `add tooltip` also ensure `Components/App.razor` has interactive render mode on both `HeadOutlet` and `Routes`; other components do not change render mode configuration.
+- `add accordion`, `add alert-dialog`, `add carousel`, `add dialog`, `add dropdown-menu`, `add popover`, `add select`, `add slider`, `add switch`, `add toggle`, `add toggle-group`, and `add tooltip` also ensure `Components/App.razor` has interactive render mode on both `HeadOutlet` and `Routes`; other components do not change render mode configuration.
 - `add --force` overwrites existing component files, and `add --dry-run` previews the action.
 - `new` creates a fresh Blazor app, removes the template demo content, configures Tailwind/fonts/imports, and leaves the project ready for `blazor-shadcn add <component>`.
 - `new --skip-install` skips `npm install`, and `new --dry-run` previews the action.
@@ -164,7 +172,7 @@ dotnet pack BlazorShadcn.Cli\BlazorShadcn.Cli.csproj -c Release
 Install it from the local package source:
 
 ```powershell
-dotnet tool install --global blazor-shadcn --version 0.2.37 --configfile .\NuGet.Local.config
+dotnet tool install --global blazor-shadcn --version 0.2.42 --configfile .\NuGet.Local.config
 ```
 
 Run it:
@@ -209,7 +217,7 @@ Update the installed tool after making changes:
 
 ```powershell
 dotnet pack BlazorShadcn.Cli\BlazorShadcn.Cli.csproj -c Release
-dotnet tool update --global blazor-shadcn --version 0.2.38 --configfile .\NuGet.Local.config
+dotnet tool update --global blazor-shadcn --version 0.2.42 --configfile .\NuGet.Local.config
 ```
 
 `add` depends on the component files existing in the source GitHub repository. By default the CLI uses `Justbeingjustin/blazor-shadcn` on the `main` branch. Set `BLAZOR_SHADCN_REPOSITORY` to use a different `<owner>/<repo>`.

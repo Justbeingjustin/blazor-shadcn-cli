@@ -230,6 +230,20 @@ internal static partial class BlazorShadcnCli
                     "CardTitle.razor",
                 ],
                 "Structured content container."),
+            ["carousel"] = new(
+                "carousel",
+                [
+                    "Carousel.razor",
+                    "CarouselApi.cs",
+                    "CarouselContent.razor",
+                    "CarouselContext.cs",
+                    "CarouselItem.razor",
+                    "CarouselNext.razor",
+                    "CarouselPrevious.razor",
+                    "carousel.js",
+                ],
+                "Interactive carousel with context, API, items, and navigation controls.",
+                ["button"]),
             ["checkbox"] = new("checkbox", ["Checkbox.razor"], "Selectable checkbox control."),
             ["dialog"] = new(
                 "dialog",
@@ -259,8 +273,18 @@ internal static partial class BlazorShadcnCli
                     "FieldSet.razor",
                     "FieldTitle.razor",
                 ],
-                "Form field container.",
-                SourceDirectory: "BlazorShadcn/Components/UI"),
+                "Form field container."),
+            ["empty"] = new(
+                "empty",
+                [
+                    "Empty.razor",
+                    "EmptyContent.razor",
+                    "EmptyDescription.razor",
+                    "EmptyHeader.razor",
+                    "EmptyMedia.razor",
+                    "EmptyTitle.razor",
+                ],
+                "Empty state primitives with header, media, title, description, and content."),
             ["dropdown-menu"] = new(
                 "dropdown-menu",
                 [
@@ -546,14 +570,14 @@ internal static partial class BlazorShadcnCli
             return 1;
         }
 
-        var targetDirectory = Path.Combine(projectRoot, "Components", "UI");
+        var componentTargetDirectory = Path.Combine(projectRoot, "Components", "UI");
         var globalsCssPath = Path.Combine(projectRoot, "Styles", "globals.css");
         var globalsCssResult = await WriteGlobalsCssAsync(globalsCssPath);
         var componentsToInstall = ResolveInstallOrder(component).ToArray();
 
         foreach (var componentToInstall in componentsToInstall)
         {
-            var installResult = await InstallComponentFilesAsync(componentToInstall, projectRoot, targetDirectory, parse.Force, parse.DryRun);
+            var installResult = await InstallComponentFilesAsync(componentToInstall, projectRoot, componentTargetDirectory, parse.Force, parse.DryRun);
             if (!installResult.Success)
             {
                 Console.Error.WriteLine(installResult.Message);
@@ -1121,12 +1145,12 @@ internal static partial class BlazorShadcnCli
         yield return component;
     }
 
-    private static async Task<ComponentInstallResult> InstallComponentFilesAsync(ComponentDefinition component, string projectRoot, string targetDirectory, bool force, bool dryRun)
+    private static async Task<ComponentInstallResult> InstallComponentFilesAsync(ComponentDefinition component, string projectRoot, string componentTargetDirectory, bool force, bool dryRun)
     {
         var fileOperations = component.FileNames
             .Select(fileName => new ComponentFileOperation(
                 fileName,
-                Path.Combine(targetDirectory, fileName),
+                GetComponentTargetPath(projectRoot, componentTargetDirectory, fileName),
                 BuildComponentUrl(component, fileName)))
             .ToArray();
         var existingFiles = fileOperations
@@ -1149,12 +1173,11 @@ internal static partial class BlazorShadcnCli
             return new(true, string.Empty);
         }
 
-        Directory.CreateDirectory(targetDirectory);
-
         try
         {
             foreach (var operation in fileOperations)
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(operation.TargetPath)!);
                 var componentContent = await DownloadComponentAsync(operation.SourceUrl);
                 await File.WriteAllTextAsync(operation.TargetPath, componentContent, Utf8NoBom);
             }
@@ -1190,6 +1213,14 @@ internal static partial class BlazorShadcnCli
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsStringAsync();
     }
+
+    private static string GetComponentTargetPath(string projectRoot, string componentTargetDirectory, string fileName)
+        => IsJavaScriptAsset(fileName)
+            ? Path.Combine(projectRoot, "wwwroot", "blazor-shadcn", fileName)
+            : Path.Combine(componentTargetDirectory, fileName);
+
+    private static bool IsJavaScriptAsset(string fileName)
+        => string.Equals(Path.GetExtension(fileName), ".js", StringComparison.OrdinalIgnoreCase);
 
     private static string? FindProjectRoot(string startDirectory)
     {
@@ -1812,6 +1843,7 @@ internal static partial class BlazorShadcnCli
     private static bool RequiresInteractiveRenderMode(string componentName)
         => string.Equals(componentName, "accordion", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "alert-dialog", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "carousel", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "dialog", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "dropdown-menu", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "popover", StringComparison.OrdinalIgnoreCase)
@@ -1823,7 +1855,8 @@ internal static partial class BlazorShadcnCli
             || string.Equals(componentName, "tooltip", StringComparison.OrdinalIgnoreCase);
 
     private static bool RequiresAppRazorScript(string componentName)
-        => string.Equals(componentName, "select", StringComparison.OrdinalIgnoreCase);
+        => string.Equals(componentName, "select", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "carousel", StringComparison.OrdinalIgnoreCase);
 
     private static async Task<CommandResult> EnsureComponentInteractivityAsync(string appRazorPath, string componentDisplayName)
     {
@@ -1862,6 +1895,11 @@ internal static partial class BlazorShadcnCli
             return new(false, $"{componentDisplayName} requires Components/App.razor so the required client-side script can be configured.");
         }
 
+        if (string.Equals(componentDisplayName, "carousel", StringComparison.OrdinalIgnoreCase))
+        {
+            return await EnsureCarouselAppRazorScriptAsync(appRazorPath, dryRun);
+        }
+
         var lines = (await File.ReadAllLinesAsync(appRazorPath)).ToList();
         if (lines.Any(line => line.Contains("window.blazorShadcnSelect", StringComparison.Ordinal)))
         {
@@ -1883,6 +1921,34 @@ internal static partial class BlazorShadcnCli
         var updatedContent = NormalizeLineEndings(string.Join(Environment.NewLine, lines));
         await File.WriteAllTextAsync(appRazorPath, updatedContent + Environment.NewLine, Utf8NoBom);
         return new(true, $"Updated Components/App.razor with the required client-side script for {componentDisplayName.ToLowerInvariant()}.");
+    }
+
+    private static async Task<CommandResult> EnsureCarouselAppRazorScriptAsync(string appRazorPath, bool dryRun)
+    {
+        const string carouselScriptReference = """<script src="@Assets["blazor-shadcn/carousel.js"]"></script>""";
+        const string frameworkScriptReference = """<script src="@Assets["_framework/blazor.web.js"]"></script>""";
+
+        var lines = (await File.ReadAllLinesAsync(appRazorPath)).ToList();
+        if (lines.Any(line => line.Contains("blazor-shadcn/carousel.js", StringComparison.Ordinal)))
+        {
+            return new(true, "Components/App.razor already contains the required client-side script for carousel.");
+        }
+
+        var frameworkScriptIndex = FindLineIndex(lines, frameworkScriptReference);
+        if (frameworkScriptIndex < 0)
+        {
+            return new(false, """Carousel requires a <script src="@Assets["_framework/blazor.web.js"]"></script> entry in Components/App.razor.""");
+        }
+
+        if (dryRun)
+        {
+            return new(true, "Would update Components/App.razor with the required client-side script for carousel.");
+        }
+
+        lines.Insert(frameworkScriptIndex, $"    {carouselScriptReference}");
+        var updatedContent = NormalizeLineEndings(string.Join(Environment.NewLine, lines));
+        await File.WriteAllTextAsync(appRazorPath, updatedContent + Environment.NewLine, Utf8NoBom);
+        return new(true, "Updated Components/App.razor with the required client-side script for carousel.");
     }
 
     private static string AddInteractiveRenderModeIfMissing(string content, Regex tagRegex, out bool changed)
@@ -2297,7 +2363,7 @@ internal static partial class BlazorShadcnCli
         Console.WriteLine("Commands:");
         Console.WriteLine("  new <project-name>   Create a new Blazor app configured for blazor-shadcn");
         Console.WriteLine("  init                 Configure the current Blazor project");
-        Console.WriteLine("  add <component>      Add a component into Components/UI");
+        Console.WriteLine("  add <component>      Add a component into Components/UI (and JS assets into wwwroot/blazor-shadcn)");
         Console.WriteLine("  list                 List available components");
         Console.WriteLine("  doctor               Validate local prerequisites and project shape");
         Console.WriteLine("  version              Show the current CLI version");
@@ -2324,7 +2390,7 @@ internal static partial class BlazorShadcnCli
     private static void PrintAddHelp()
     {
         Console.WriteLine($"Usage: {ToolName} add <component> [--force] [--dry-run]");
-        Console.WriteLine("Download a component into Components/UI.");
+        Console.WriteLine("Download a component into Components/UI and any required JS assets into wwwroot/blazor-shadcn.");
     }
 
     private static void PrintListHelp()
