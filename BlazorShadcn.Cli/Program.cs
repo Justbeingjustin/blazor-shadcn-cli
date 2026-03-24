@@ -87,6 +87,18 @@ internal static partial class BlazorShadcnCli
         "--input: oklch(1 0 0 / 15%);",
         "--ring: oklch(0.556 0 0);",
     ];
+    private const string NoScrollbarUtilityBlock = """
+        @layer utilities {
+          .no-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+
+          .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        }
+        """;
     private static readonly string[] SelectInteropScriptLines =
     [
         "    <script>",
@@ -1331,6 +1343,17 @@ internal static partial class BlazorShadcnCli
                 font-family: var(--font-sans);
               }
             }
+
+            @layer utilities {
+              .no-scrollbar::-webkit-scrollbar {
+                display: none;
+              }
+
+              .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+            }
             """;
 
         if (!File.Exists(globalsCssPath))
@@ -1358,13 +1381,29 @@ internal static partial class BlazorShadcnCli
         updatedContent = EnsureCssBlockVariables(updatedContent, ".dark", DarkThemeTokenLines, out var darkChanged) ?? updatedContent;
         changed |= darkChanged;
 
+        updatedContent = EnsureCssSnippet(updatedContent, NoScrollbarUtilityBlock, out var noScrollbarChanged);
+        changed |= noScrollbarChanged;
+
         if (!changed)
         {
-            return new(FileChangeStatus.Unchanged, "Styles/globals.css already contains the required theme tokens.");
+            return new(FileChangeStatus.Unchanged, "Styles/globals.css already contains the required theme tokens and utilities.");
         }
 
         await File.WriteAllTextAsync(globalsCssPath, updatedContent + Environment.NewLine, Utf8NoBom);
-        return new(FileChangeStatus.Updated, "Updated Styles/globals.css with missing theme tokens.");
+        return new(FileChangeStatus.Updated, "Updated Styles/globals.css with missing theme tokens and utilities.");
+    }
+
+    private static string EnsureCssSnippet(string content, string snippet, out bool changed)
+    {
+        if (content.Contains(".no-scrollbar", StringComparison.Ordinal))
+        {
+            changed = false;
+            return content;
+        }
+
+        changed = true;
+        var normalizedContent = content.TrimEnd();
+        return $"{normalizedContent}{Environment.NewLine}{Environment.NewLine}{NormalizeLineEndings(snippet)}";
     }
 
     private static string? EnsureCssBlockVariables(string content, string selector, IReadOnlyList<string> variableLines, out bool changed)

@@ -172,7 +172,7 @@ dotnet pack BlazorShadcn.Cli\BlazorShadcn.Cli.csproj -c Release
 Install it from the local package source:
 
 ```powershell
-dotnet tool install --global blazor-shadcn --version 0.2.42 --configfile .\NuGet.Local.config
+dotnet tool install --global blazor-shadcn --version 0.2.43 --configfile .\NuGet.Local.config
 ```
 
 Run it:
@@ -217,7 +217,7 @@ Update the installed tool after making changes:
 
 ```powershell
 dotnet pack BlazorShadcn.Cli\BlazorShadcn.Cli.csproj -c Release
-dotnet tool update --global blazor-shadcn --version 0.2.42 --configfile .\NuGet.Local.config
+dotnet tool update --global blazor-shadcn --version 0.2.43 --configfile .\NuGet.Local.config
 ```
 
 `add` depends on the component files existing in the source GitHub repository. By default the CLI uses `Justbeingjustin/blazor-shadcn` on the `main` branch. Set `BLAZOR_SHADCN_REPOSITORY` to use a different `<owner>/<repo>`.
