@@ -29,6 +29,7 @@ blazor-shadcn add separator
 blazor-shadcn add skeleton
 blazor-shadcn add spinner
 blazor-shadcn add switch
+blazor-shadcn add tabs
 blazor-shadcn add toggle
 blazor-shadcn add toggle-group
 blazor-shadcn add tooltip
@@ -70,6 +71,7 @@ Run `blazor-shadcn help <command>` for command-specific options.
 - `skeleton`
 - `spinner`
 - `switch`
+- `tabs`
 - `toggle`
 - `toggle-group`
 - `tooltip`
@@ -108,6 +110,7 @@ blazor-shadcn add separator
 blazor-shadcn add skeleton
 blazor-shadcn add spinner
 blazor-shadcn add switch
+blazor-shadcn add tabs
 blazor-shadcn add toggle
 blazor-shadcn add toggle-group
 blazor-shadcn add tooltip
@@ -144,12 +147,13 @@ blazor-shadcn add typography
 - `separator` installs `Separator.razor`.
 - `skeleton` installs `Skeleton.razor`.
 - `switch` installs `Switch.razor`.
+- `tabs` installs `Tabs.razor`, `TabsContent.razor`, `TabsContext.cs`, `TabsList.razor`, and `TabsTrigger.razor`.
 - `toggle` installs `Toggle.razor`.
 - `toggle-group` installs `Toggle.razor`, `ToggleGroup.razor`, `ToggleGroupContext.cs`, and `ToggleGroupItem.razor`.
 - `add toggle-group` installs `toggle` first so shared toggle primitives come from the `toggle` component source.
 - `tooltip` installs `Tooltip.razor`, `TooltipContent.razor`, `TooltipProviderContext.cs`, `TooltipProvider.razor`, and `TooltipTrigger.razor`.
 - `textarea` installs `Textarea.razor`.
-- `add accordion`, `add alert-dialog`, `add carousel`, `add dialog`, `add dropdown-menu`, `add popover`, `add select`, `add slider`, `add switch`, `add toggle`, `add toggle-group`, and `add tooltip` also ensure `Components/App.razor` has interactive render mode on both `HeadOutlet` and `Routes`; other components do not change render mode configuration.
+- `add accordion`, `add alert-dialog`, `add carousel`, `add dialog`, `add dropdown-menu`, `add popover`, `add select`, `add slider`, `add switch`, `add tabs`, `add toggle`, `add toggle-group`, and `add tooltip` also ensure `Components/App.razor` has interactive render mode on both `HeadOutlet` and `Routes`; other components do not change render mode configuration.
 - `add --force` overwrites existing component files, and `add --dry-run` previews the action.
 - `new` creates a fresh Blazor app, removes the template demo content, configures Tailwind/fonts/imports, and leaves the project ready for `blazor-shadcn add <component>`.
 - `new --skip-install` skips `npm install`, and `new --dry-run` previews the action.
@@ -172,7 +176,7 @@ dotnet pack BlazorShadcn.Cli\BlazorShadcn.Cli.csproj -c Release
 Install it from the local package source:
 
 ```powershell
-dotnet tool install --global blazor-shadcn --version 0.2.43 --configfile .\NuGet.Local.config
+dotnet tool install --global blazor-shadcn --version 0.2.46 --configfile .\NuGet.Local.config
 ```
 
 Run it:
@@ -203,6 +207,7 @@ blazor-shadcn add separator
 blazor-shadcn add skeleton
 blazor-shadcn add spinner
 blazor-shadcn add switch
+blazor-shadcn add tabs
 blazor-shadcn add toggle
 blazor-shadcn add toggle-group
 blazor-shadcn add tooltip
@@ -217,7 +222,7 @@ Update the installed tool after making changes:
 
 ```powershell
 dotnet pack BlazorShadcn.Cli\BlazorShadcn.Cli.csproj -c Release
-dotnet tool update --global blazor-shadcn --version 0.2.43 --configfile .\NuGet.Local.config
+dotnet tool update --global blazor-shadcn --version 0.2.46 --configfile .\NuGet.Local.config
 ```
 
 `add` depends on the component files existing in the source GitHub repository. By default the CLI uses `Justbeingjustin/blazor-shadcn` on the `main` branch. Set `BLAZOR_SHADCN_REPOSITORY` to use a different `<owner>/<repo>`.

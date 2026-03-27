@@ -413,6 +413,16 @@ internal static partial class BlazorShadcnCli
             ["skeleton"] = new("skeleton", ["Skeleton.razor"], "Placeholder loading surface."),
             ["spinner"] = new("spinner", ["Spinner.razor"], "Loading indicator."),
             ["switch"] = new("switch", ["Switch.razor"], "Toggle switch control."),
+            ["tabs"] = new(
+                "tabs",
+                [
+                    "Tabs.razor",
+                    "TabsContent.razor",
+                    "TabsContext.cs",
+                    "TabsList.razor",
+                    "TabsTrigger.razor",
+                ],
+                "Tabbed interface primitives with list, triggers, and content panels."),
             ["toggle"] = ToggleComponent,
             ["toggle-group"] = ToggleGroupComponent,
             ["togglegroup"] = ToggleGroupComponent,
@@ -1889,6 +1899,7 @@ internal static partial class BlazorShadcnCli
             || string.Equals(componentName, "select", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "slider", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "switch", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(componentName, "tabs", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "toggle", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "toggle-group", StringComparison.OrdinalIgnoreCase)
             || string.Equals(componentName, "tooltip", StringComparison.OrdinalIgnoreCase);
